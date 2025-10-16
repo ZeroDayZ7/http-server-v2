@@ -48,6 +48,12 @@ func main() {
 	// graceful shutdown
 	server.SetupGracefulShutdown(app, closeDB, config.AppConfig.Shutdown)
 
-	logger.GetLogger().Info("Listening", zap.String("port", config.AppConfig.Server.Port))
-	app.Listen(":" + config.AppConfig.Server.Port)
+	address := "0.0.0.0:" + config.AppConfig.Server.Port
+	logger.GetLogger().Info(
+		"Server listening",
+		zap.String("address", address),
+	)
+	if err := app.Listen(address); err != nil {
+		logger.GetLogger().Fatal("Failed to start server", zap.Error(err))
+	}
 }
