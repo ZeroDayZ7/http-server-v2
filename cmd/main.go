@@ -4,11 +4,9 @@ import (
 	"os"
 
 	"github.com/zerodayz7/http-server/config"
-	"github.com/zerodayz7/http-server/internal/handler"
-	mysqlrepo "github.com/zerodayz7/http-server/internal/repository/mysql"
+	"github.com/zerodayz7/http-server/internal/di"
 	"github.com/zerodayz7/http-server/internal/router"
 	"github.com/zerodayz7/http-server/internal/server"
-	"github.com/zerodayz7/http-server/internal/service"
 	"github.com/zerodayz7/http-server/internal/shared/logger"
 	"go.uber.org/zap"
 )
@@ -22,25 +20,20 @@ func main() {
 	}
 
 	// DB
-	conn, closeDB := config.MustInitDB()
+	db, closeDB := config.MustInitDB()
 	defer closeDB()
 
-	// Repos, service, handlers
-	userRepo := mysqlrepo.NewUserRepository(conn)
-	authSvc := service.NewAuthService(userRepo)
-	userSvc := service.NewUserService(userRepo)
-
-	authHandler := handler.NewAuthHandler(authSvc)
-	userHandler := handler.NewUserHandler(userSvc)
+	// dependency injection container
+	container := di.NewContainer(db)
 
 	// session
-	sessionStore := config.InitSessionStore(conn)
+	sessionStore := config.InitSessionStore(db)
 
 	// Fiber
 	app := config.NewFiberApp(sessionStore)
 
 	// routes
-	router.SetupRoutes(app, authHandler, userHandler, sessionStore)
+	router.SetupRoutes(app, container.AuthHandler, container.UserHandler, sessionStore)
 
 	// graceful shutdown
 	server.SetupGracefulShutdown(app, closeDB, config.AppConfig.Shutdown)

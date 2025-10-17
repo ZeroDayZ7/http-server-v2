@@ -1,6 +1,6 @@
 package service
 
-import "github.com/zerodayz7/http-server/internal/repository"
+import "github.com/zerodayz7/http-server/internal/features/users/repository"
 
 type UserService struct {
 	repo repository.UserRepository

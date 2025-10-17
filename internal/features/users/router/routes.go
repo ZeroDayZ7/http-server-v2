@@ -4,7 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/csrf"
 	"github.com/zerodayz7/http-server/config"
-	"github.com/zerodayz7/http-server/internal/handler"
+	"github.com/zerodayz7/http-server/internal/features/users/handler"
 )
 
 func SetupUserRoutes(app *fiber.App, h *handler.UserHandler) {

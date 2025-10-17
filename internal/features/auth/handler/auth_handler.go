@@ -5,7 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"github.com/zerodayz7/http-server/config"
 	"github.com/zerodayz7/http-server/internal/errors"
-	"github.com/zerodayz7/http-server/internal/service"
+	"github.com/zerodayz7/http-server/internal/features/auth/service"
 	"github.com/zerodayz7/http-server/internal/shared"
 	"github.com/zerodayz7/http-server/internal/validator"
 )

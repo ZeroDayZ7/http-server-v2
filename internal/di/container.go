@@ -2,25 +2,35 @@
 package di
 
 import (
-	"github.com/zerodayz7/http-server/config"
-	"github.com/zerodayz7/http-server/internal/handler"
-	"github.com/zerodayz7/http-server/internal/repository/mysql"
-	"github.com/zerodayz7/http-server/internal/service"
+	authHandler "github.com/zerodayz7/http-server/internal/features/auth/handler"
+	userHandler "github.com/zerodayz7/http-server/internal/features/users/handler"
+
+	authService "github.com/zerodayz7/http-server/internal/features/auth/service"
+	userService "github.com/zerodayz7/http-server/internal/features/users/service"
+
+	"github.com/zerodayz7/http-server/internal/features/users/repository/mysql"
+
+	"gorm.io/gorm"
 )
 
+// Container przechowuje wszystkie zależności serwisów i handlerów
 type Container struct {
-	AuthHandler *handler.AuthHandler
-	UserHandler *handler.UserHandler
+	AuthHandler *authHandler.AuthHandler
+	UserHandler *userHandler.UserHandler
 }
 
-func NewContainer(conn *config.DBConn) *Container {
-	userRepo := mysql.NewUserRepository(conn)
+// NewContainer tworzy nowy kontener z wszystkimi zależnościami
+func NewContainer(db *gorm.DB) *Container {
+	// repozytorium użytkowników
+	userRepo := mysql.NewUserRepository(db)
 
-	authSvc := service.NewAuthService(userRepo)
-	userSvc := service.NewUserService(userRepo)
+	// serwisy
+	authSvc := authService.NewAuthService(userRepo)
+	userSvc := userService.NewUserService(userRepo)
 
+	// handlery
 	return &Container{
-		AuthHandler: handler.NewAuthHandler(authSvc),
-		UserHandler: handler.NewUserHandler(userSvc),
+		AuthHandler: authHandler.NewAuthHandler(authSvc),
+		UserHandler: userHandler.NewUserHandler(userSvc),
 	}
 }

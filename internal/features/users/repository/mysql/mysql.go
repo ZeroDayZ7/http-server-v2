@@ -3,8 +3,8 @@ package mysql
 import (
 	"errors"
 
-	"github.com/zerodayz7/http-server/internal/model"
-	"github.com/zerodayz7/http-server/internal/repository"
+	"github.com/zerodayz7/http-server/internal/features/users/model"
+	"github.com/zerodayz7/http-server/internal/features/users/repository"
 	"gorm.io/gorm"
 )
 

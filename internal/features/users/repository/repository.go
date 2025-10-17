@@ -1,6 +1,6 @@
 package repository
 
-import "github.com/zerodayz7/http-server/internal/model"
+import "github.com/zerodayz7/http-server/internal/features/users/model"
 
 type UserRepository interface {
 	CreateUser(*model.User) error

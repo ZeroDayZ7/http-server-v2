@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"github.com/zerodayz7/http-server/internal/errors"
-	"github.com/zerodayz7/http-server/internal/model"
-	"github.com/zerodayz7/http-server/internal/repository"
-	"github.com/zerodayz7/http-server/internal/service/security"
+	"github.com/zerodayz7/http-server/internal/features/users/model"
+	"github.com/zerodayz7/http-server/internal/features/users/repository"
 	"github.com/zerodayz7/http-server/internal/shared/logger"
+	"github.com/zerodayz7/http-server/internal/shared/security"
 
 	"go.uber.org/zap"
 )
