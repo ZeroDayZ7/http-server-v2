@@ -1,12 +1,15 @@
 package handler
 
 import (
+	"fmt"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
-	"github.com/zerodayz7/http-server/config"
 	"github.com/zerodayz7/http-server/internal/errors"
 	"github.com/zerodayz7/http-server/internal/features/auth/service"
 	"github.com/zerodayz7/http-server/internal/shared"
+	"github.com/zerodayz7/http-server/internal/shared/logger"
+	"github.com/zerodayz7/http-server/internal/shared/security"
 	"github.com/zerodayz7/http-server/internal/validator"
 )
 
@@ -58,43 +61,60 @@ func (h *AuthHandler) GetCSRFToken(c *fiber.Ctx) error {
 }
 
 func (h *AuthHandler) Login(c *fiber.Ctx) error {
+	log := logger.GetLogger()
+
 	body := c.Locals("validatedBody").(validator.LoginRequest)
+	log.InfoObj("Login attempt", map[string]any{
+		"email": body.Email,
+	})
 
 	user, err := h.authService.GetUserByEmail(body.Email)
 	if err != nil {
+		log.WarnObj("Login failed: user not found", map[string]any{
+			"email": body.Email,
+		})
 		return errors.SendAppError(c, errors.ErrInvalidCredentials)
 	}
+
+	log.InfoObj("User found", map[string]any{
+		"id": user.ID,
+	})
 
 	valid, err := h.authService.VerifyPassword(user, body.Password)
-	if err != nil || !valid {
+	if err != nil {
+		log.ErrorObj("Error verifying password", err)
+		return errors.SendAppError(c, errors.ErrInternal)
+	}
+	if !valid {
+		log.WarnObj("Invalid password attempt", map[string]any{
+			"userID": user.ID,
+		})
 		return errors.SendAppError(c, errors.ErrInvalidCredentials)
 	}
 
-	if user.TwoFactorEnabled {
+	if user.TwoFactorEnabled && user.TwoFactorSecret != "" {
+		log.InfoObj("2FA required for user", map[string]any{
+			"userID": user.ID,
+		})
 		return c.JSON(fiber.Map{"2fa_required": true})
 	}
 
-	sess, err := config.SessionStore().Get(c)
+	token, err := security.GenerateToken(fmt.Sprint(user.ID))
 	if err != nil {
+		log.ErrorObj("Failed to generate JWT", err)
 		return errors.SendAppError(c, errors.ErrInternal)
 	}
-
-	sess.Set("userID", user.ID)
-
-	csrfToken := sess.Get("csrfToken")
-	if csrfToken == nil {
-		csrfToken = shared.GenerateUuid()
-		sess.Set("csrfToken", csrfToken)
-	}
-
-	if err := sess.Save(); err != nil {
-		return errors.SendAppError(c, errors.ErrInternal)
-	}
-
-	return c.JSON(fiber.Map{
-		"2fa_required": false,
-		"csrf_token":   csrfToken,
+	log.InfoObj("JWT generated for user", map[string]any{
+		"userID": user.ID,
 	})
+
+	payload := fiber.Map{
+		"2fa_required": false,
+		"token":        token,
+	}
+	log.InfoObj("Login successful", payload)
+
+	return c.JSON(payload)
 }
 
 func (h *AuthHandler) Register(c *fiber.Ctx) error {

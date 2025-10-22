@@ -1,7 +1,6 @@
 package router
 
 import (
-	"github.com/gofiber/fiber/v2/middleware/csrf"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"github.com/zerodayz7/http-server/internal/features/auth/handler"
 	"github.com/zerodayz7/http-server/internal/middleware"
@@ -15,8 +14,8 @@ func SetupAuthRoutes(app *fiber.App, h *handler.AuthHandler, sessionStore *sessi
 	auth := app.Group("/auth")
 	auth.Use(config.NewLimiter("auth"))
 
-	csrfCfg := config.NewCSRFConfig(sessionStore.Storage)
-	auth.Use(csrf.New(csrfCfg))
+	// csrfCfg := config.NewCSRFConfig(sessionStore.Storage)
+	// auth.Use(csrf.New(csrfCfg))
 
 	auth.Get("/init-session", h.InitSession)
 

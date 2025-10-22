@@ -86,6 +86,14 @@ func (l *Logger) InfoObj(msg string, obj any) {
 	l.Logger.WithOptions(zap.AddCallerSkip(1)).Info(msg, zap.Any("data", obj))
 }
 
+func (l *Logger) WarnObj(msg string, obj any) {
+	l.Logger.WithOptions(zap.AddCallerSkip(1)).Warn(msg, zap.Any("data", obj))
+}
+
+func (l *Logger) ErrorObj(msg string, obj any) {
+	l.Logger.WithOptions(zap.AddCallerSkip(1)).Error(msg, zap.Any("data", obj))
+}
+
 func (l *Logger) DebugObj(msg string, obj any) {
 	l.Logger.WithOptions(zap.AddCallerSkip(1)).Debug(msg, zap.Any("data", obj))
 }
